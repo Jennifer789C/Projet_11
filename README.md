@@ -48,6 +48,27 @@ pip install -r requirements.txt
 
 ### 3. Lancer le serveur
 
+Vous devez indiquer à Flask que votre app est sur le fichier server.py :
+
+*Pour ma part, je travaille sous Windows et avec Powershell*
+
+Depuis Powershell :
+```bash
+$env:FLASK_APP = "server.py"
+flask run
+```
+
+Depuis l'invite de commande de Windows :
+```bash
+set FLASK_APP=server.py
+flask run
+```
+
+Depuis un terminal sous Linux ou Mac :
+```bash
+export FLASK_APP=server.py
+flask run
+```
 
 
 ### 4. Autres détails
