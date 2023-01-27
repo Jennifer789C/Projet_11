@@ -1,4 +1,3 @@
-import server
 from server import loadClubs, loadCompetitions
 
 
@@ -45,9 +44,14 @@ def test_login_adresse_valide(client, templates_utilises, club, competitions):
     assert context["competitions"] == competitions
 
 
-def test_login_adresse_invalide():
-    pass
+def test_login_adresse_invalide(client, templates_utilises, club):
+    reponse = client.post("/showSummary", data={"email": "mail@test.fr"}, follow_redirects=True)
+    assert reponse.status_code == 200
+    assert len(templates_utilises) == 1
+    template, context = templates_utilises[0]
+    assert template.name == "index.html"
 
 
-def test_vue_showSummary_inaccessible():
-    pass
+def test_vue_showSummary_inaccessible(client):
+    reponse = client.get("/showSummary")
+    assert reponse.status_code == 405
