@@ -141,19 +141,26 @@ def test_reservation_12_max_acces_supplementaire_valide(client, templates_utilis
     assert context["competitions"] == competitions
 
 
-def test_vue_puchasePlaces_inaccessible():
+def test_vue_puchasePlaces_inaccessible(client):
     """Méthode GET non autorisée sur l'URL /purchasePlaces"""
-    pass
+    reponse = client.get("/purchasePlaces")
+    assert reponse.status_code == 405
 
 
-def test_bouton_reservation_inaccessible():
+def test_bouton_reservation_inaccessible(client, templates_utilises, club, competitions):
     """Le bouton de réservation ne doit pas s'afficher si :
     - il n'y a plus de place disponible dans la compétition
     - le club n'a plus de point disponible
     - le club a déjà dépensé 12 points dans cette compétition
     - la date de la compétition est antérieure à la date du jour
     """
-    pass
+    club = club[0]
+    competition = competitions[0]
+    competition["numberOfPlaces"] = 0
+    reponse = client.post("/showSummary", data={"email": club["email"]}, follow_redirects=True)
+    template, context = templates_utilises[0]
+    assert template.name == "welcome.html"
+    assert b"Book Places" not in reponse.data
 
 
 def test_points_disponible():
