@@ -20,6 +20,7 @@ app.secret_key = 'something_special'
 competitions = loadCompetitions()
 clubs = loadClubs()
 MAX_PLACES = 12
+places_reservees = {}
 
 
 @app.route('/')
@@ -54,18 +55,37 @@ def purchasePlaces():
     competition = [c for c in competitions if c['name'] == request.form['competition']][0]
     club = [c for c in clubs if c['name'] == request.form['club']][0]
     placesRequired = int(request.form['places'])
+
     if placesRequired > int(club["points"]):
         flash(f"Vous n'avez pas assez de points, votre solde est de {club['points']}.")
         return redirect(url_for('book', competition=competition["name"], club=club["name"]))
+
     elif placesRequired > int(competition["numberOfPlaces"]):
         flash(f"Il ne reste que {competition['numberOfPlaces']} places disponibles, vous ne pouvez pas en réserver plus.")
         return redirect(url_for('book', competition=competition["name"], club=club["name"]))
+
+    elif competition["name"] in places_reservees:
+        if placesRequired + places_reservees[competition["name"]] > MAX_PLACES:
+            flash(f"Vous avez déjà réservé {places_reservees[competition['name']]} places pour cette compétition. Vous ne pouvez en "
+                  f"réserver que {MAX_PLACES} au total.")
+            return redirect(url_for('book', competition=competition["name"], club=club["name"]))
+
+        else:
+            competition['numberOfPlaces'] = int(competition['numberOfPlaces']) - placesRequired
+            club["points"] = int(club["points"]) - placesRequired
+            places_reservees[competition["name"]] = places_reservees[competition["name"]] + placesRequired
+            flash(f"Félicitations! Vous avez correctement réservé {places_reservees[competition['name']]} places pour la compétition "
+                  f"{competition['name']}.")
+            return render_template('welcome.html', club=club, competitions=competitions)
+
     elif placesRequired > MAX_PLACES:
         flash(f"Afin de garantir l'équité entre clubs, vous ne pouvez pas réserver plus de {MAX_PLACES} places par compétition.")
         return redirect(url_for('book', competition=competition["name"], club=club["name"]))
+
     else:
+        places_reservees[competition["name"]] = placesRequired
         competition['numberOfPlaces'] = int(competition['numberOfPlaces']) - placesRequired
-        flash('Great-booking complete!')
+        flash(f"Félicitations! Vous avez correctement réservé {placesRequired} places pour la compétition {competition['name']}.")
         return render_template('welcome.html', club=club, competitions=competitions)
 
 

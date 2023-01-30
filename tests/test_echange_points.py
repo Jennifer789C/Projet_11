@@ -1,3 +1,6 @@
+import server
+
+
 def test_vue_book(client, templates_utilises, club, competitions):
     """Test de la vue si club et compétition ok : status_code + template + context"""
     club = club[0]
@@ -91,7 +94,7 @@ def test_reservation_limite_places(client, templates_utilises, club, competition
     assert context["competition"] == competition
 
 
-def test_reservation_12_max(client, templates_utilises, club, competitions):
+def test_reservation_12_max_premier_acces(client, templates_utilises, club, competitions):
     """Le club ne peut pas réserver plus de 12 places par compétition"""
     club = club[0]
     competition = competitions[0]
@@ -104,6 +107,38 @@ def test_reservation_12_max(client, templates_utilises, club, competitions):
     assert template.name == "booking.html"
     assert context["club"] == club
     assert context["competition"] == competition
+
+
+def test_reservation_12_max_acces_supplementaire_invalide(client, templates_utilises, club, competitions, mocker):
+    """Le club ne peut pas réserver plus de 12 places par compétition"""
+    club = club[0]
+    competition = competitions[0]
+    mocker.patch.object(server, "places_reservees", {competition["name"]: 3})
+    places = 10
+    data = {"club": club["name"], "competition": competition["name"], "places": places}
+    reponse = client.post("/purchasePlaces", data=data, follow_redirects=True)
+    assert reponse.status_code == 200
+    assert len(templates_utilises) == 1
+    template, context = templates_utilises[0]
+    assert template.name == "booking.html"
+    assert context["club"] == club
+    assert context["competition"] == competition
+
+
+def test_reservation_12_max_acces_supplementaire_valide(client, templates_utilises, club, competitions, mocker):
+    """Le club ne peut pas réserver plus de 12 places par compétition"""
+    club = club[0]
+    competition = competitions[0]
+    mocker.patch.object(server, "places_reservees", {competition["name"]: 1})
+    places = 10
+    data = {"club": club["name"], "competition": competition["name"], "places": places}
+    reponse = client.post("/purchasePlaces", data=data, follow_redirects=True)
+    assert reponse.status_code == 200
+    assert len(templates_utilises) == 1
+    template, context = templates_utilises[0]
+    assert template.name == "welcome.html"
+    assert context["club"] == club
+    assert context["competitions"] == competitions
 
 
 def test_vue_puchasePlaces_inaccessible():
