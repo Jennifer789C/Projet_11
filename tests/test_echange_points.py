@@ -72,12 +72,23 @@ def test_reservation_limite_points(client, templates_utilises, club, competition
     template, context = templates_utilises[0]
     assert template.name == "booking.html"
     assert context["club"] == club
-    assert context["competitions"] == competitions
+    assert context["competition"] == competition
 
 
-def test_reservation_limite_places():
+def test_reservation_limite_places(client, templates_utilises, club, competitions):
     """Le club ne peut pas réserver plus de places que la compétition en a de disponible"""
-    pass
+    club = club[0]
+    competition = competitions[0]
+    competition["numberOfPlaces"] = 5
+    places = 11
+    data = {"club": club["name"], "competition": competition["name"], "places": places}
+    reponse = client.post("/purchasePlaces", data=data, follow_redirects=True)
+    assert reponse.status_code == 200
+    assert len(templates_utilises) == 1
+    template, context = templates_utilises[0]
+    assert template.name == "booking.html"
+    assert context["club"] == club
+    assert context["competition"] == competition
 
 
 def test_reservation_12_max():
