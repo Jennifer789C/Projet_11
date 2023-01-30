@@ -91,9 +91,19 @@ def test_reservation_limite_places(client, templates_utilises, club, competition
     assert context["competition"] == competition
 
 
-def test_reservation_12_max():
+def test_reservation_12_max(client, templates_utilises, club, competitions):
     """Le club ne peut pas réserver plus de 12 places par compétition"""
-    pass
+    club = club[0]
+    competition = competitions[0]
+    places = 13
+    data = {"club": club["name"], "competition": competition["name"], "places": places}
+    reponse = client.post("/purchasePlaces", data=data, follow_redirects=True)
+    assert reponse.status_code == 200
+    assert len(templates_utilises) == 1
+    template, context = templates_utilises[0]
+    assert template.name == "booking.html"
+    assert context["club"] == club
+    assert context["competition"] == competition
 
 
 def test_vue_puchasePlaces_inaccessible():
