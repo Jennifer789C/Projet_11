@@ -19,6 +19,7 @@ app.secret_key = 'something_special'
 
 competitions = loadCompetitions()
 clubs = loadClubs()
+MAX_PLACES = 12
 
 
 @app.route('/')
@@ -54,10 +55,13 @@ def purchasePlaces():
     club = [c for c in clubs if c['name'] == request.form['club']][0]
     placesRequired = int(request.form['places'])
     if placesRequired > int(club["points"]):
-        flash(f"Vous n'avez pas assez de points, votre solde est de {club['points']}")
+        flash(f"Vous n'avez pas assez de points, votre solde est de {club['points']}.")
         return redirect(url_for('book', competition=competition["name"], club=club["name"]))
     elif placesRequired > int(competition["numberOfPlaces"]):
-        flash(f"Il ne reste que {competition['numberOfPlaces']} places disponibles, vous ne pouvez pas en réserver plus")
+        flash(f"Il ne reste que {competition['numberOfPlaces']} places disponibles, vous ne pouvez pas en réserver plus.")
+        return redirect(url_for('book', competition=competition["name"], club=club["name"]))
+    elif placesRequired > MAX_PLACES:
+        flash(f"Afin de garantir l'équité entre clubs, vous ne pouvez pas réserver plus de {MAX_PLACES} places par compétition.")
         return redirect(url_for('book', competition=competition["name"], club=club["name"]))
     else:
         competition['numberOfPlaces'] = int(competition['numberOfPlaces']) - placesRequired
