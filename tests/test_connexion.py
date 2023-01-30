@@ -56,8 +56,7 @@ def test_login_adresse_valide(client, templates_utilises, club, competitions):
 
 
 def test_login_adresse_invalide(client, templates_utilises, club):
-    """Le club essaie de se connecter avec une adresse mail invalide : un message d'erreur s'affiche et le club est invité à
-    modifier son adresse mail de connexion"""
+    """Le club essaie de se connecter avec une adresse mail invalide"""
     reponse = client.post("/showSummary", data={"email": "mail@test.fr"}, follow_redirects=True)
     assert reponse.status_code == 200
     assert len(templates_utilises) == 1

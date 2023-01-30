@@ -44,14 +44,35 @@ def test_vue_book_inaccessible(client):
     assert reponse.status_code == 405
 
 
-def test_reservation():
+def test_reservation(client, templates_utilises, club, competitions):
     """Saisie d'une valeur pour réserver"""
-    pass
+    club = club[0]
+    competition = competitions[0]["name"]
+    places = 7
+    data = {"club": club["name"], "competition": competition, "places": places}
+    reponse = client.post("/purchasePlaces", data=data, follow_redirects=True)
+    assert reponse.status_code == 200
+    assert len(templates_utilises) == 1
+    template, context = templates_utilises[0]
+    assert template.name == "welcome.html"
+    assert context["club"] == club
+    assert context["competitions"] == competitions
 
 
-def test_reservation_limite_points():
+def test_reservation_limite_points(client, templates_utilises, club, competitions):
     """Le club ne peut pas réserver plus de places qu'il n'a de points"""
-    pass
+    club = club[0]
+    club["points"] = 10
+    competition = competitions[0]
+    places = 11
+    data = {"club": club["name"], "competition": competition["name"], "places": places}
+    reponse = client.post("/purchasePlaces", data=data, follow_redirects=True)
+    assert reponse.status_code == 200
+    assert len(templates_utilises) == 1
+    template, context = templates_utilises[0]
+    assert template.name == "booking.html"
+    assert context["club"] == club
+    assert context["competitions"] == competitions
 
 
 def test_reservation_limite_places():
@@ -66,6 +87,7 @@ def test_reservation_12_max():
 
 def test_vue_puchasePlaces_inaccessible():
     """Méthode GET non autorisée sur l'URL /purchasePlaces"""
+    pass
 
 
 def test_bouton_reservation_inaccessible():
