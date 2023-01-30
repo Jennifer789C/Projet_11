@@ -1,4 +1,3 @@
-from flask import request, url_for
 from server import loadClubs, loadCompetitions
 
 
