@@ -47,7 +47,7 @@ def book(competition, club):
         return render_template('booking.html', club=foundClub[0], competition=foundCompetition[0])
     else:
         flash("Something went wrong-please try again")
-        return render_template('welcome.html', club=club, competitions=competitions)
+        return redirect(url_for('index'))
 
 
 @app.route('/purchasePlaces', methods=['POST'])
