@@ -193,6 +193,11 @@ def test_bouton_reservation_inaccessible(client, templates_utilises, club, compe
     assert b"Book Places" not in reponse.data
 
 
+def test_saisie_valeur_negative():
+    """Le club ne doit pas pouvoir réserver un nombre de places négatif"""
+    pass
+
+
 def test_points_disponible():
     """Le nombre de points du club doit être à jour"""
     pass

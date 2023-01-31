@@ -75,6 +75,7 @@ def purchasePlaces():
             club["points"] = int(club["points"]) - placesRequired
             reservations.append({"club": club["name"], "competition": competition["name"], "places": placesRequired})
             flash(f"Félicitations! Vous avez correctement réservé {placesRequired} places pour la compétition {competition['name']}.")
+            competition.update({club["name"]: placesRequired})
             return render_template('welcome.html', club=club, competitions=competitions)
 
     elif placesRequired + int(places_reservees[0]["places"]) > MAX_PLACES:
@@ -88,6 +89,7 @@ def purchasePlaces():
         places_reservees[0]["places"] = placesRequired + int(places_reservees[0]["places"])
         flash(f"Félicitations! Vous avez correctement réservé {places_reservees[0]['places']} places pour la compétition "
               f"{competition['name']}.")
+        competition.update({club["name"]: placesRequired})
         return render_template('welcome.html', club=club, competitions=competitions)
 
 
