@@ -157,7 +157,7 @@ def test_vue_puchasePlaces_inaccessible(client):
     assert reponse.status_code == 405
 
 
-def test_bouton_reservation_inaccessible(client, templates_utilises, club, competitions):
+def test_bouton_reservation_inaccessible(client, templates_utilises, club, competitions, mocker):
     """Le bouton de réservation ne doit pas s'afficher si :
     - il n'y a plus de place disponible dans la compétition
     - le club n'a plus de point disponible
@@ -177,6 +177,19 @@ def test_bouton_reservation_inaccessible(client, templates_utilises, club, compe
     reponse = client.post("/showSummary", data={"email": club["email"]}, follow_redirects=True)
     template, context = templates_utilises[0]
     assert template.name == "welcome.html"
+    assert b"Book Places" not in reponse.data
+
+    club["points"] = 3
+    reservations = mocker.patch.object(server, "reservations", [{"club": "Club test",
+                                                                 "competition": "Competition test",
+                                                                 "places": "10"}])
+    places = 2
+    data = {"club": club["name"], "competition": competition["name"], "places": places}
+    reponse = client.post("/purchasePlaces", data=data, follow_redirects=True)
+    template, context = templates_utilises[0]
+    assert template.name == "welcome.html"
+    places_reservees = [c for c in reservations if c["club"] == club["name"] and c["competition"] == competition["name"]]
+    assert places_reservees[0]["places"] == 12
     assert b"Book Places" not in reponse.data
 
 
