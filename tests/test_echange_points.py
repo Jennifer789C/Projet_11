@@ -23,9 +23,7 @@ def test_vue_book_club_errone(client, templates_utilises, competitions):
     assert reponse.status_code == 200
     assert len(templates_utilises) == 1
     template, context = templates_utilises[0]
-    assert template.name == "welcome.html"
-    assert context["club"] == "Club erreur"
-    assert context["competitions"] == competitions
+    assert template.name == "index.html"
 
 
 def test_vue_book_competition_erronnee(client, templates_utilises, club, competitions):
@@ -36,9 +34,7 @@ def test_vue_book_competition_erronnee(client, templates_utilises, club, competi
     assert reponse.status_code == 200
     assert len(templates_utilises) == 1
     template, context = templates_utilises[0]
-    assert template.name == "welcome.html"
-    assert context["club"] == club
-    assert context["competitions"] == competitions
+    assert template.name == "index.html"
 
 
 def test_vue_book_inaccessible(client):
@@ -110,10 +106,15 @@ def test_reservation_12_max_premier_acces(client, templates_utilises, club, comp
 
 
 def test_reservation_12_max_acces_supplementaire_invalide(client, templates_utilises, club, competitions, mocker):
-    """Le club ne peut pas réserver plus de 12 places par compétition"""
+    """Le club ne peut pas réserver plus de 12 places par compétition, même en se connectant plusieurs fois"""
     club = club[0]
     competition = competitions[0]
-    mocker.patch.object(server, "places_reservees", {competition["name"]: 3})
+    reservations = mocker.patch.object(server, "reservations", [{"club": "Club test",
+                                                                 "competition": "Competition test",
+                                                                 "places": "3"},
+                                                                {"club": "Club test",
+                                                                 "competition": "Competition 2",
+                                                                 "places": "3"}])
     places = 10
     data = {"club": club["name"], "competition": competition["name"], "places": places}
     reponse = client.post("/purchasePlaces", data=data, follow_redirects=True)
@@ -123,13 +124,20 @@ def test_reservation_12_max_acces_supplementaire_invalide(client, templates_util
     assert template.name == "booking.html"
     assert context["club"] == club
     assert context["competition"] == competition
+    places_reservees = [c for c in reservations if c["club"] == club["name"] and c["competition"] == competition["name"]]
+    assert places_reservees[0]["places"] == "3"
 
 
 def test_reservation_12_max_acces_supplementaire_valide(client, templates_utilises, club, competitions, mocker):
-    """Le club ne peut pas réserver plus de 12 places par compétition"""
+    """Le club ne peut pas réserver plus de 12 places par compétition, même en se connectant plusieurs fois"""
     club = club[0]
     competition = competitions[0]
-    mocker.patch.object(server, "places_reservees", {competition["name"]: 1})
+    reservations = mocker.patch.object(server, "reservations", [{"club": "Club test",
+                                                                 "competition": "Competition test",
+                                                                 "places": "1"},
+                                                                {"club": "Club test",
+                                                                 "competition": "Competition 2",
+                                                                 "places": "3"}])
     places = 10
     data = {"club": club["name"], "competition": competition["name"], "places": places}
     reponse = client.post("/purchasePlaces", data=data, follow_redirects=True)
@@ -139,6 +147,8 @@ def test_reservation_12_max_acces_supplementaire_valide(client, templates_utilis
     assert template.name == "welcome.html"
     assert context["club"] == club
     assert context["competitions"] == competitions
+    places_reservees = [c for c in reservations if c["club"] == club["name"] and c["competition"] == competition["name"]]
+    assert places_reservees[0]["places"] == 1+places
 
 
 def test_vue_puchasePlaces_inaccessible(client):
@@ -157,6 +167,13 @@ def test_bouton_reservation_inaccessible(client, templates_utilises, club, compe
     club = club[0]
     competition = competitions[0]
     competition["numberOfPlaces"] = 0
+    reponse = client.post("/showSummary", data={"email": club["email"]}, follow_redirects=True)
+    template, context = templates_utilises[0]
+    assert template.name == "welcome.html"
+    assert b"Book Places" not in reponse.data
+
+    competition["numberOfPlaces"] = 10
+    club["points"] = 0
     reponse = client.post("/showSummary", data={"email": club["email"]}, follow_redirects=True)
     template, context = templates_utilises[0]
     assert template.name == "welcome.html"
