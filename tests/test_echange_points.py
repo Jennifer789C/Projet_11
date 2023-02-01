@@ -169,9 +169,19 @@ def test_reservation_date_anterieure(client, templates_utilises, club, competiti
     assert club["points"] == 10
 
 
-def test_saisie_valeur_negative():
+def test_reservation_valeur_negative(client, templates_utilises, club, competitions):
     """Le club ne doit pas pouvoir réserver un nombre de places négatif"""
-    pass
+    club = club[0]
+    competition = competitions[0]
+    places = -1
+    data = {"club": club["name"], "competition": competition["name"], "places": places}
+    reponse = client.post("/purchasePlaces", data=data, follow_redirects=True)
+    assert reponse.status_code == 200
+    assert len(templates_utilises) == 1
+    template, context = templates_utilises[0]
+    assert template.name == "booking.html"
+    assert context["club"] == club
+    assert context["competition"] == competition
 
 
 def test_vue_puchasePlaces_inaccessible(client):
