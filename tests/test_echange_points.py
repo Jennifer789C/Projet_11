@@ -157,13 +157,8 @@ def test_vue_puchasePlaces_inaccessible(client):
     assert reponse.status_code == 405
 
 
-def test_bouton_reservation_inaccessible(client, templates_utilises, club, competitions, mocker):
-    """Le bouton de réservation ne doit pas s'afficher si :
-    - il n'y a plus de place disponible dans la compétition
-    - le club n'a plus de point disponible
-    - le club a déjà dépensé 12 points dans cette compétition
-    - la date de la compétition est antérieure à la date du jour
-    """
+def test_bouton_reservation_inaccessible_places(client, templates_utilises, club, competitions):
+    """Le bouton de réservation ne doit pas s'afficher s'il n'y a plus de place disponible dans la compétition"""
     club = club[0]
     competition = competitions[0]
     competition["numberOfPlaces"] = 0
@@ -172,13 +167,21 @@ def test_bouton_reservation_inaccessible(client, templates_utilises, club, compe
     assert template.name == "welcome.html"
     assert b"Book Places" not in reponse.data
 
-    competition["numberOfPlaces"] = 10
+
+def test_bouton_reservation_inaccessible_points(client, templates_utilises, club):
+    """Le bouton de réservation ne doit pas s'afficher si le club n'a plus de point disponible"""
+    club = club[0]
     club["points"] = 0
     reponse = client.post("/showSummary", data={"email": club["email"]}, follow_redirects=True)
     template, context = templates_utilises[0]
     assert template.name == "welcome.html"
     assert b"Book Places" not in reponse.data
 
+
+def test_bouton_reservation_inaccessible_max_12(client, templates_utilises, club, competitions, mocker):
+    """Le bouton de réservation ne doit pas s'afficher si le club a déjà dépensé 12 points dans cette compétition"""
+    club = club[0]
+    competition = competitions[0]
     club["points"] = 3
     reservations = mocker.patch.object(server, "reservations", [{"club": "Club test",
                                                                  "competition": "Competition test",
@@ -190,6 +193,17 @@ def test_bouton_reservation_inaccessible(client, templates_utilises, club, compe
     assert template.name == "welcome.html"
     places_reservees = [c for c in reservations if c["club"] == club["name"] and c["competition"] == competition["name"]]
     assert places_reservees[0]["places"] == 12
+    assert b"Book Places" not in reponse.data
+
+
+def test_bouton_reservation_inaccessible_date_passee(client, templates_utilises, club, competitions):
+    """Le bouton de réservation ne doit pas s'afficher si la date de la compétition est antérieure à la date du jour"""
+    club = club[0]
+    competition = competitions[0]
+    competition["date"] = "2023-01-21 10:00:00"
+    reponse = client.post("/showSummary", data={"email": club["email"]}, follow_redirects=True)
+    template, context = templates_utilises[0]
+    assert template.name == "welcome.html"
     assert b"Book Places" not in reponse.data
 
 

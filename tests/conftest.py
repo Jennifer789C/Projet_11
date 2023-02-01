@@ -34,6 +34,6 @@ def club(mocker):
 @pytest.fixture()
 def competitions(mocker):
     competitions = mocker.patch.object(server, "competitions", [{"name": "Competition test",
-                                                                 "date": "2023-01-27 10:00:00",
+                                                                 "date": "2023-03-21 10:00:00",
                                                                  "numberOfPlaces": "25"}])
     return competitions

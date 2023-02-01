@@ -22,7 +22,7 @@ def test_loadCompetitions():
                  "date": "2020-03-27 10:00:00",
                  "numberOfPlaces": "25"},
                 {"name": "Fall Classic",
-                 "date": "2020-10-22 13:30:00",
+                 "date": "2023-10-22 13:30:00",
                  "numberOfPlaces": "13"}
                 ]
     assert loadCompetitions() == resultat
