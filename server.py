@@ -62,6 +62,10 @@ def purchasePlaces():
         flash(f"Cette compétition est terminée, vous ne pouvez plus réserver de places.")
         return render_template('welcome.html', club=club, competitions=competitions, datetime=datetime)
 
+    elif placesRequired < 0:
+        flash(f"Vous avez saisi une valeur négative, veuillez réessayer.")
+        return redirect(url_for('book', competition=competition["name"], club=club["name"]))
+
     elif placesRequired > int(club["points"]):
         flash(f"Vous n'avez pas assez de points, votre solde est de {club['points']}.")
         return redirect(url_for('book', competition=competition["name"], club=club["name"]))
