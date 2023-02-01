@@ -1,5 +1,6 @@
 import json
 from flask import Flask, render_template, request, redirect, flash, url_for
+from datetime import datetime
 
 
 def loadClubs():
@@ -36,7 +37,7 @@ def showSummary():
         return redirect(url_for('index'))
     else:
         club = club[0]
-    return render_template('welcome.html', club=club, competitions=competitions)
+    return render_template('welcome.html', club=club, competitions=competitions, datetime=datetime)
 
 
 @app.route('/book/<competition>/<club>')
@@ -57,7 +58,11 @@ def purchasePlaces():
     placesRequired = int(request.form['places'])
     places_reservees = [c for c in reservations if c["club"] == club["name"] and c["competition"] == competition["name"]]
 
-    if placesRequired > int(club["points"]):
+    if datetime.now() > datetime.strptime(competition["date"], "%Y-%m-%d %H:%M:%S"):
+        flash(f"Cette compétition est terminée, vous ne pouvez plus réserver de places.")
+        return render_template('welcome.html', club=club, competitions=competitions, datetime=datetime)
+
+    elif placesRequired > int(club["points"]):
         flash(f"Vous n'avez pas assez de points, votre solde est de {club['points']}.")
         return redirect(url_for('book', competition=competition["name"], club=club["name"]))
 
@@ -76,7 +81,7 @@ def purchasePlaces():
             reservations.append({"club": club["name"], "competition": competition["name"], "places": placesRequired})
             flash(f"Félicitations! Vous avez correctement réservé {placesRequired} places pour la compétition {competition['name']}.")
             competition.update({club["name"]: placesRequired})
-            return render_template('welcome.html', club=club, competitions=competitions)
+            return render_template('welcome.html', club=club, competitions=competitions, datetime=datetime)
 
     elif placesRequired + int(places_reservees[0]["places"]) > MAX_PLACES:
         flash(f"Vous avez déjà réservé {places_reservees[0]['places']} places pour cette compétition. Vous ne pouvez en réserver que "
@@ -90,7 +95,7 @@ def purchasePlaces():
         flash(f"Félicitations! Vous avez correctement réservé {places_reservees[0]['places']} places pour la compétition "
               f"{competition['name']}.")
         competition.update({club["name"]: places_reservees[0]["places"]})
-        return render_template('welcome.html', club=club, competitions=competitions)
+        return render_template('welcome.html', club=club, competitions=competitions, datetime=datetime)
 
 
 # TODO: Add route for points display

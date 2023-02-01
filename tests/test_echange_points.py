@@ -151,6 +151,29 @@ def test_reservation_12_max_acces_supplementaire_valide(client, templates_utilis
     assert places_reservees[0]["places"] == 1+places
 
 
+def test_reservation_date_anterieure(client, templates_utilises, club, competitions):
+    """Le club ne peut pas réserver une place sur une compétition ayant une date antérieure"""
+    club = club[0]
+    club["points"] = 10
+    competition = competitions[0]
+    competition["date"] = "2023-01-21 10:00:00"
+    places = 2
+    data = {"club": club["name"], "competition": competition["name"], "places": places}
+    reponse = client.post("/purchasePlaces", data=data, follow_redirects=True)
+    assert reponse.status_code == 200
+    assert len(templates_utilises) == 1
+    template, context = templates_utilises[0]
+    assert template.name == "welcome.html"
+    assert context["club"] == club
+    assert context["competitions"] == competitions
+    assert club["points"] == 10
+
+
+def test_saisie_valeur_negative():
+    """Le club ne doit pas pouvoir réserver un nombre de places négatif"""
+    pass
+
+
 def test_vue_puchasePlaces_inaccessible(client):
     """Méthode GET non autorisée sur l'URL /purchasePlaces"""
     reponse = client.get("/purchasePlaces")
@@ -205,11 +228,6 @@ def test_bouton_reservation_inaccessible_date_passee(client, templates_utilises,
     template, context = templates_utilises[0]
     assert template.name == "welcome.html"
     assert b"Book Places" not in reponse.data
-
-
-def test_saisie_valeur_negative():
-    """Le club ne doit pas pouvoir réserver un nombre de places négatif"""
-    pass
 
 
 def test_points_disponible():
