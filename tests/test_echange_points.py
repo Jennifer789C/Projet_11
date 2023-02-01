@@ -1,3 +1,5 @@
+import datetime
+
 import server
 
 
@@ -46,9 +48,11 @@ def test_vue_book_inaccessible(client):
 def test_reservation(client, templates_utilises, club, competitions):
     """Saisie d'une valeur pour réserver"""
     club = club[0]
-    competition = competitions[0]["name"]
+    club["points"] = 15
+    competition = competitions[0]
+    competition["numberOfPlaces"] = 20
     places = 7
-    data = {"club": club["name"], "competition": competition, "places": places}
+    data = {"club": club["name"], "competition": competition["name"], "places": places}
     reponse = client.post("/purchasePlaces", data=data, follow_redirects=True)
     assert reponse.status_code == 200
     assert len(templates_utilises) == 1
@@ -56,6 +60,8 @@ def test_reservation(client, templates_utilises, club, competitions):
     assert template.name == "welcome.html"
     assert context["club"] == club
     assert context["competitions"] == competitions
+    assert club["points"] == 15-7
+    assert competition["numberOfPlaces"] == 20-7
 
 
 def test_reservation_limite_points(client, templates_utilises, club, competitions):
@@ -238,13 +244,3 @@ def test_bouton_reservation_inaccessible_date_passee(client, templates_utilises,
     template, context = templates_utilises[0]
     assert template.name == "welcome.html"
     assert b"Book Places" not in reponse.data
-
-
-def test_points_disponible():
-    """Le nombre de points du club doit être à jour"""
-    pass
-
-
-def test_places_disponible():
-    """Le nombre de places disponibles de la compétition doit être à jour"""
-    pass
