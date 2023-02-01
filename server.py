@@ -89,7 +89,7 @@ def purchasePlaces():
         places_reservees[0]["places"] = placesRequired + int(places_reservees[0]["places"])
         flash(f"Félicitations! Vous avez correctement réservé {places_reservees[0]['places']} places pour la compétition "
               f"{competition['name']}.")
-        competition.update({club["name"]: placesRequired})
+        competition.update({club["name"]: places_reservees[0]["places"]})
         return render_template('welcome.html', club=club, competitions=competitions)
 
 
