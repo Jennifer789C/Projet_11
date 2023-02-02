@@ -26,7 +26,7 @@ reservations = []
 
 @app.route('/')
 def index():
-    return render_template('index.html', clubs=clubs)
+    return render_template('index.html')
 
 
 @app.route('/showSummary', methods=['POST'])
@@ -100,6 +100,11 @@ def purchasePlaces():
               f"{competition['name']}.")
         competition.update({club["name"]: places_reservees[0]["places"]})
         return render_template('welcome.html', club=club, competitions=competitions, datetime=datetime)
+
+
+@app.route('/tableau')
+def tableau():
+    return render_template('tableau.html', clubs=clubs)
 
 
 @app.route('/logout')

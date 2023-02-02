@@ -73,3 +73,19 @@ flask run
 
 ### 4. Autres détails
 
+Les mails de connexion des clubs sont dans le fichier clubs.json  
+Si vous souhaitez vérifier les tests :  
+- pour les tests unitaires et d'intégration :
+```bash
+pytest
+```
+- pour la couverture de tests :
+```bash
+pytest --cov=.
+```
+- pour les tests de performance, lancer le serveur flask sur un premier 
+  terminal, puis sur un second :
+```bash
+cd tests/tests_performance
+locust
+```

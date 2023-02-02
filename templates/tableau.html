@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableau des points || GUDLFT</title>
+</head>
+<body>
+    <a href="{{url_for('index')}}">Retour</a>
+    <h3>Voici le tableau récapitulatif des points de chaque club inscrit</h3>
+    <table>
+        <thead>
+            <tr>
+                <th scope="col">Club</th>
+                <th scope="col">Points</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for club in clubs %}
+            <tr>
+                <td>{{ club["name"] }}</td>
+                <td>{{ club["points"] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
