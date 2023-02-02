@@ -21,5 +21,24 @@
         <button type="submit">Enter</button>
     </form>
     {% endwith %}
+    <br>
+    <br>
+    <h4>Voici le tableau récapitulatif des points de chaque club inscrit</h4>
+    <table>
+        <thead>
+            <tr>
+                <th scope="col">Club</th>
+                <th scope="col">Points</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for club in clubs %}
+            <tr>
+                <td>{{ club["name"] }}</td>
+                <td>{{ club["points"] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </body>
 </html>
