@@ -37,3 +37,9 @@ def competitions(mocker):
                                                                  "date": "2023-12-21 10:00:00",
                                                                  "numberOfPlaces": "25"}])
     return competitions
+
+
+@pytest.fixture()
+def reservations(mocker):
+    reservations = mocker.patch.object(server, "reservations", [])
+    return reservations
